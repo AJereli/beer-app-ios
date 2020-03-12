@@ -10,15 +10,33 @@ import SwiftUI
 import Combine
 
 class LoginViewModel: ObservableObject {
-
     
-    let objectWillChange = PassthroughSubject<Void, Never>()
     
     @Published var email: String = ""
-    var password: String = ""
+    @Published var password: String = ""
     
+    @Published var isValidEmail: Bool = false
+    private var bag = Set<AnyCancellable>()
+
+    init() {
+        isValidEmailPublisher
+            .receive(on: RunLoop.main)
+            .assign(to: \.isValidEmail, on: self)
+            .store(in: &bag)
+    }
+    private var isValidEmailPublisher: AnyPublisher<Bool, Never> {
+        $email
+            .debounce(for: 0.8, scheduler: RunLoop.main)
+            .removeDuplicates()
+            .map { email in
+                return email.count > 4
+        }
+        .eraseToAnyPublisher()
+    }
     
     func login(){
+        email = "vfbf" + email
+        
         print(email)
     }
 }
